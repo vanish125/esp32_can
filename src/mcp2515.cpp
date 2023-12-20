@@ -34,7 +34,9 @@
 #include "mcp2515_defs.h"
 #include "esp32_can.h"
 
-SPISettings mcpSPISettings(8000000, MSBFIRST, SPI_MODE0);
+#define FD_SPI_SPEED 10000000
+
+SPISettings mcpSPISettings(FD_SPI_SPEED, MSBFIRST, SPI_MODE0);
 
 static TaskHandle_t intDelegateTask = NULL;
 
@@ -108,15 +110,15 @@ MCP2515::MCP2515(uint8_t CS_Pin, uint8_t INT_Pin) : CAN_COMMON(6) {
   pinMode(CS_Pin, OUTPUT);
   digitalWrite(CS_Pin,HIGH);
   pinMode(INT_Pin,INPUT);
-  digitalWrite(INT_Pin,HIGH);
+  // digitalWrite(INT_Pin,HIGH);
 
-  attachInterrupt(INT_Pin, MCP_INTHandler, FALLING);
+  // attachInterrupt(INT_Pin, MCP_INTHandler, FALLING);
   
   _CS = CS_Pin;
   _INT = INT_Pin;
   
   savedBaud = 0;
-  savedFreq = 16;
+  savedFreq = 8;
   running = 0; 
   inhibitTransactions = false;
   initializedResources = false;
@@ -139,11 +141,11 @@ void MCP2515::initializeResources()
 
 void MCP2515::setINTPin(uint8_t pin)
 {
-  detachInterrupt(_INT);
+  // detachInterrupt(_INT);
   _INT = pin;
-  pinMode(_INT,INPUT);
-  digitalWrite(_INT,HIGH);
-  attachInterrupt(_INT, MCP_INTHandler, FALLING);
+  // pinMode(_INT,INPUT);
+  // digitalWrite(_INT,HIGH);
+  // attachInterrupt(_INT, MCP_INTHandler, FALLING);
 }
 
 void MCP2515::setCSPin(uint8_t pin)
@@ -237,7 +239,7 @@ int MCP2515::Init(uint32_t CAN_Bus_Speed, uint8_t Freq, uint8_t SJW) {
 
 bool MCP2515::_init(uint32_t CAN_Bus_Speed, uint8_t Freq, uint8_t SJW, bool autoBaud) {
 
-  SPI.begin(SCK, MISO, MOSI, SS);       //Set up Serial Peripheral Interface Port for CAN2
+  SPI.begin(12, 13, 11, 10);       //Set up Serial Peripheral Interface Port for CAN2
   SPI.setClockDivider(SPI_CLOCK_DIV32);
   SPI.setDataMode(SPI_MODE0);
   SPI.setBitOrder(MSBFIRST);
@@ -258,7 +260,7 @@ bool MCP2515::_init(uint32_t CAN_Bus_Speed, uint8_t Freq, uint8_t SJW, bool auto
   float TQ;
   uint8_t BT;
   float tempBT;
-  float freqMhz = Freq * 1000000.0;
+  float freqMhz = 8 * 1000000.0;
   float bestMatchf = 10.0;
   int bestMatchIdx = 10;
   float savedBT;
