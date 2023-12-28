@@ -1,4 +1,4 @@
-esp32_can
+  Fixing MCP2515 library
 ==========
 
 A new, unified library all inclusive of code needed to make it operate. Implements
